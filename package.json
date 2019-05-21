@@ -3,16 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "aws-amplify": "^1.1.11",
-    "aws-amplify-react": "^2.1.5",
+    "aws-amplify": "^1.1.27",
+    "aws-amplify-react": "^2.3.7",
+    "aws-sdk": "^2.456.0",
     "date-fns": "^1.29.0",
-    "element-react": "^1.4.25",
+    "element-react": "^1.4.33",
     "element-theme-default": "^1.4.13",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
+    "react": "^16.8.6",
+    "react-dom": "npm:@hot-loader/react-dom@^16.8.6",
+    "react-hot-loader": "^4.8.4",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "2.1.1",
-    "react-stripe-checkout": "^2.6.3"
+    "react-scripts": "^2.1.1",
+    "react-stripe-checkout": "^2.6.3",
+    "react-stripe-elements": "^3.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
