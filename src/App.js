@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { API, graphqlOperation, Auth, Hub } from 'aws-amplify';
 import { Authenticator, AmplifyTheme } from 'aws-amplify-react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { Router, Route } from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import './App.css';
 
@@ -13,6 +14,8 @@ import ProfilePage from './pages/ProfilePage';
 import MarketPage from './pages/MarketPage';
 import Navbar from './components/Navbar';
 import Stripe from './components/Stripe';
+
+export const history = createBrowserHistory();
 
 export const UserContext = React.createContext();
 
@@ -88,7 +91,7 @@ const App = () => {
     <Authenticator theme={theme} />
   ) : (
     <UserContext.Provider value={{ user }}>
-      <Router>
+      <Router history={history}>
         <>
           {/* Navigation */}
           <Navbar user={user} onSignout={handleSignout} />
