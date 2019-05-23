@@ -21,6 +21,7 @@ export const UserContext = React.createContext();
 
 const App = () => {
   const [user, setUser] = useState(null);
+  const [userAttributes, setUserAttributes] = useState(null);
 
   const registerNewUser = async signInData => {
     const getUserInput = {
@@ -47,10 +48,22 @@ const App = () => {
   };
 
   useEffect(() => {
+    let isSubscribed = true;
+
     const getUserData = async () => {
       try {
         const user = await Auth.currentAuthenticatedUser();
-        user ? setUser(user) : setUser(null);
+        // user ? setUser(user) : setUser(null);
+        if (isSubscribed) {
+          if (user) {
+            const attributesArr = await Auth.userAttributes(user);
+            const attributesObj = await Auth.attributesToObject(attributesArr);
+            setUserAttributes(attributesObj);
+            setUser(user);
+          } else {
+            setUser(null);
+          }
+        }
       } catch (error) {
         console.log(error);
       }
@@ -77,6 +90,10 @@ const App = () => {
 
     getUserData();
     Hub.listen('auth', onHubCapsule);
+
+    return () => {
+      isSubscribed = false;
+    };
   }, []);
 
   const handleSignout = async () => {
@@ -90,7 +107,7 @@ const App = () => {
   return !user ? (
     <Authenticator theme={theme} />
   ) : (
-    <UserContext.Provider value={{ user }}>
+    <UserContext.Provider value={{ user, userAttributes }}>
       <Router history={history}>
         <>
           {/* Navigation */}
@@ -101,7 +118,9 @@ const App = () => {
             <Route exact path="/" component={HomePage} />
             <Route
               path="/profile"
-              component={() => <ProfilePage user={user} />}
+              component={() => (
+                <ProfilePage user={user} userAttributes={userAttributes} />
+              )}
             />
             <Route
               path="/markets/:marketId"
