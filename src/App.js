@@ -13,7 +13,6 @@ import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import MarketPage from './pages/MarketPage';
 import Navbar from './components/Navbar';
-import Stripe from './components/Stripe';
 
 export const history = createBrowserHistory();
 
@@ -130,7 +129,6 @@ const App = () => {
                 );
               }}
             />
-            <Route path="/payments" component={Stripe} />
           </div>
         </>
       </Router>
