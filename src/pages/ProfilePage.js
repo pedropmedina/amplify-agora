@@ -1,6 +1,6 @@
 // prettier-ignore
 import React, { useEffect, useState } from 'react';
-import { API, graphqlOperation } from 'aws-amplify';
+import { Auth, API, graphqlOperation } from 'aws-amplify';
 import {
   Table,
   Button,
@@ -17,6 +17,7 @@ import {
 } from 'element-react';
 
 import { convertCentsToDollars } from '../utils';
+import { CodeBuild } from 'aws-sdk';
 
 const getUser = `query GetUser($id: ID!) {
   getUser(id: $id) {
@@ -50,6 +51,10 @@ const getUser = `query GetUser($id: ID!) {
 `;
 
 const ProfilePage = ({ user, userAttributes }) => {
+  const [email, setEmail] = useState(userAttributes.email);
+  const [emailDialog, setEmailDialog] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationForm, setVerificationForm] = useState(false);
   const [orders, setOrders] = useState([]);
   const [columns, setColumns] = useState([
     { prop: 'name', width: '150' },
@@ -74,7 +79,13 @@ const ProfilePage = ({ user, userAttributes }) => {
         switch (row.name) {
           case 'Email':
             return (
-              <Button type="info" size="small">
+              <Button
+                onClick={() => {
+                  setEmailDialog(true);
+                }}
+                type="info"
+                size="small"
+              >
                 Edit
               </Button>
             );
@@ -101,6 +112,55 @@ const ProfilePage = ({ user, userAttributes }) => {
     const input = { id: userId };
     const { data } = await API.graphql(graphqlOperation(getUser, input));
     setOrders(data.getUser.orders.items);
+  };
+
+  const handleUpdateEmail = async () => {
+    try {
+      const updatedAttributes = {
+        email
+      };
+      const result = await Auth.updateUserAttributes(user, updatedAttributes);
+      if (result === 'SUCCESS') {
+        sendVerificationCode('email');
+      }
+    } catch (error) {
+      console.error(error);
+      Notification.error({
+        title: 'Error',
+        message: `${error.message || "Error updating user's email"}`
+      });
+    }
+  };
+
+  const sendVerificationCode = async attr => {
+    await Auth.verifyCurrentUserAttribute(attr);
+    setVerificationForm(true);
+    Message({
+      type: 'info',
+      customClass: 'message',
+      message: `Verification code sent to ${email}`
+    });
+  };
+
+  const handleVerifyEmail = async attr => {
+    try {
+      const result = await Auth.verifyCurrentUserAttributeSubmit(
+        attr,
+        verificationCode
+      );
+      Notification({
+        title: 'Success',
+        message: 'Email successfully verified',
+        type: `${result.toLowerCase()}`
+      });
+      setTimeout(() => window.location.reload(), 300);
+    } catch (error) {
+      console.error(error);
+      Notification.error({
+        title: 'Error',
+        message: `${error.message || 'Error updating email'}`
+      });
+    }
   };
 
   return (
@@ -168,6 +228,43 @@ const ProfilePage = ({ user, userAttributes }) => {
             ))}
           </Tabs.Pane>
         </Tabs>
+        {/* Email Dialog */}
+        <Dialog
+          size="large"
+          customClass="dialog"
+          title="Edit Email"
+          visible={emailDialog}
+          onCancel={() => setEmailDialog(false)}
+        >
+          <Dialog.Body>
+            <Form labelPosition="top">
+              <Form.Item label="Email">
+                <Input value={email} onChange={email => setEmail(email)} />
+              </Form.Item>
+              {verificationForm && (
+                <Form.Item label="Enter Verfication Code" labelWidth="120">
+                  <Input
+                    onChange={code => setVerificationCode(code)}
+                    value={verificationCode}
+                  />
+                </Form.Item>
+              )}
+            </Form>
+          </Dialog.Body>
+          <Dialog.Footer>
+            <Button onClick={() => setEmailDialog(false)}>Cancel</Button>
+            {!verificationForm && (
+              <Button type="primary" onClick={handleUpdateEmail}>
+                Save
+              </Button>
+            )}
+            {verificationForm && (
+              <Button type="primary" onClick={() => handleVerifyEmail('email')}>
+                Submit
+              </Button>
+            )}
+          </Dialog.Footer>
+        </Dialog>
       </>
     )
   );
