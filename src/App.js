@@ -26,8 +26,10 @@ const App = () => {
     const getUserInput = {
       id: signInData.signInUserSession.idToken.payload.sub
     };
+    // check if user exists in db
     const { data } = await API.graphql(graphqlOperation(getUser, getUserInput));
 
+    // if not currently authenticated user does not exists in db, register user in db
     if (!data.getUser) {
       try {
         const registerUserInput = {
@@ -71,6 +73,8 @@ const App = () => {
     const onHubCapsule = capsule => {
       switch (capsule.payload.event) {
         case 'signIn':
+          // Get current authenticated user and set the state for use down the app components.
+          // Check if authenticated user exists in db, else add user to db
           console.log('signed in');
           getUserData();
           registerNewUser(capsule.payload.data);
