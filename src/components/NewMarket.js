@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
 // prettier-ignore
-import { Form, Button, Dialog, Input, Select, Notification } from 'element-react'
+import React, { useState } from 'react';
+import {
+  Form,
+  Button,
+  Dialog,
+  Input,
+  Select,
+  Notification
+} from 'element-react';
 import { API, graphqlOperation } from 'aws-amplify';
 
 import { UserContext } from '../App';

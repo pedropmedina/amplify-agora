@@ -9,6 +9,8 @@ import { listMarkets } from '../graphql/queries';
 import { onCreateMarket } from '../graphql/subscriptions';
 
 const MarketList = ({ searchResults }) => {
+  // Update local store to display latest markets.
+  // This is using Apollo Client underneath which uses the update function to update the cache
   const onNewMarket = (prevQuery, newData) => {
     let updatedQuery = { ...prevQuery };
     const updatedMarketList = [
@@ -18,6 +20,7 @@ const MarketList = ({ searchResults }) => {
     updatedQuery.listMarkets.items = updatedMarketList;
     return updatedQuery;
   };
+
   return (
     <Connect
       query={graphqlOperation(listMarkets)}
@@ -27,6 +30,7 @@ const MarketList = ({ searchResults }) => {
       {({ data, loading, errors }) => {
         if (errors.length > 0) return <Error errors={errors} />;
         if (loading || !data.listMarkets) return <Loading fullscreen={true} />;
+        // Set the current results to be either what the user searches or all the existing markets
         const markets =
           searchResults.length > 0 ? searchResults : data.listMarkets.items;
 
@@ -51,7 +55,7 @@ const MarketList = ({ searchResults }) => {
               <div key={market.id} className="my-2">
                 <Card
                   bodyStyle={{
-                    padding: '0.7em',
+                    padding: '1em',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between'
